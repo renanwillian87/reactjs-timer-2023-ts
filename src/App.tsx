@@ -12,6 +12,7 @@ export function App() {
       <Button variant="success"/>
       <Button variant="danger"/>
 
+      {/* Important to be within ThemeProvider to load global style */}
       <GlobalStyle/>
     </ThemeProvider>
   )
