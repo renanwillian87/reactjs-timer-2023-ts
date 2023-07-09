@@ -12,10 +12,11 @@ import {
   StartCountdownButton,
   TaskInput,
 } from './styles'
+import { useState } from 'react'
 
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Informe a tarefa'),
-  minuteAmount: zod
+  minutesAmount: zod
     .number()
     .min(5, 'O ciclo precisa ser no minimo 5 minutos.')
     .max(60, 'O ciclo precisa ser no maximo 60 minutos.'),
@@ -23,29 +24,52 @@ const newCycleFormValidationSchema = zod.object({
 
 // interface NewCycleFormData {
 //   task: string
-//   minuteAmount: number
+//   minutesAmount: number
 // }
 // OR
 // type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
+interface Cycle {
+  id: string
+  task: string
+  minutesAmount: number
+}
+
 export function Home() {
+  const [cycles, setCycles] = useState<Cycle[]>([])
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
   const { register, handleSubmit, watch, reset, formState } =
     useForm<NewCycleFormData>({
       resolver: zodResolver(newCycleFormValidationSchema),
       defaultValues: {
         task: '',
-        minuteAmount: 0,
+        minutesAmount: 0,
       },
     })
 
   function handleCreateNewCycle(data: NewCycleFormData) {
-    console.log(data)
+    const id = String(new Date().getTime())
+
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    }
+
+    setCycles((state) => [...state, newCycle])
+    setActiveCycleId(id)
+
     reset()
   }
 
-  console.log(formState.errors)
+  // console.log(formState.errors)
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  console.log(activeCycle)
 
   const task = watch('task')
   const isSubmitDisabled = !task
@@ -76,7 +100,7 @@ export function Home() {
             // step={5}
             // min={5}
             // max={60}
-            {...register('minuteAmount', { valueAsNumber: true })}
+            {...register('minutesAmount', { valueAsNumber: true })}
           />
 
           <span>minutos.</span>
